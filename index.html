@@ -589,6 +589,24 @@ ${warnings.length > 0 ? warnings.map(w => '• ' + w).join('\n') : '• الأد
             `;
         }
 
+        // منع تحذيرات BFCache
+        window.addEventListener('beforeunload', () => {
+            uploadedData = null;
+            parsedData = null;
+        });
+
+        window.addEventListener('pagehide', (event) => {
+            if (event.persisted) {
+                console.log('✅ الصفحة دخلت BFCache');
+            }
+        });
+
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                console.log('✅ الصفحة استرجعت من BFCache');
+            }
+        });
+
         window.addEventListener('load', () => {
             const saved = localStorage.getItem('selectedCountry');
             if (saved) currentCountry = saved;
