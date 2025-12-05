@@ -27,6 +27,8 @@
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
+            direction: rtl;
+            text-align: right;
         }
         .navbar {
             position: fixed;
@@ -45,6 +47,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-direction: row-reverse;
         }
         .nav-logo {
             font-size: 1.8rem;
@@ -62,10 +65,30 @@
             padding: 0.2rem 0.6rem;
             border-radius: 4px;
             font-size: 0.7rem;
-            margin-right: 0.5rem;
+            margin-left: 0.5rem;
             animation: pulse 2s infinite;
         }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .nav-right { display: flex; gap: 1.5rem; align-items: center; }
+        #countrySelect {
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(156, 39, 176, 0.5);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        #countrySelect:hover {
+            background: rgba(156, 39, 176, 0.2);
+            border-color: var(--ai-color);
+        }
+        #countrySelect:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(156, 39, 176, 0.5);
+        }
         .nav-links { display: flex; gap: 2rem; list-style: none; }
         .nav-links a { color: white; text-decoration: none; font-weight: 500; transition: color 0.3s; }
         .nav-links a:hover { color: var(--ai-color); }
@@ -101,7 +124,7 @@
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.3);
         }
-        .ai-indicator::before { content: '🤖'; margin-left: 0.5rem; }
+        .ai-indicator::before { content: '🤖'; margin-right: 0.5rem; }
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
         .section { margin-bottom: 3rem; }
         .section-title {
@@ -140,6 +163,7 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            text-align: right;
         }
         .service-card:hover {
             transform: translateY(-10px);
@@ -147,7 +171,7 @@
             box-shadow: 0 8px 30px rgba(156, 39, 176, 0.4);
             background: rgba(156, 39, 176, 0.1);
         }
-        .service-card .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .service-card .icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
         .service-card h3 { font-size: 1.3rem; margin-bottom: 1rem; color: var(--ai-color); }
         .service-card p { color: rgba(255,255,255,0.8); margin-bottom: 1rem; font-size: 0.95rem; }
         .service-card .status { display: inline-block; background: rgba(52, 168, 83, 0.2); color: #4ade80; padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
@@ -191,7 +215,7 @@
         .btn-lg { padding: 1.2rem 3rem; font-size: 1.1rem; width: 100%; }
         .ai-insight {
             background: linear-gradient(135deg, rgba(156, 39, 176, 0.1), rgba(66, 133, 244, 0.1));
-            border-left: 4px solid var(--ai-color);
+            border-right: 4px solid var(--ai-color);
             padding: 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
@@ -199,9 +223,10 @@
             word-wrap: break-word;
             white-space: pre-wrap;
             font-size: 0.95rem;
-            line-height: 1.6;
+            line-height: 1.8;
+            text-align: right;
         }
-        .ai-insight::before { content: '🤖 تحليل AI: '; display: block; color: var(--ai-color); font-weight: 700; margin-bottom: 0.5rem; }
+        .ai-insight::before { content: 'تحليل AI 🤖'; display: block; color: var(--ai-color); font-weight: 700; margin-bottom: 0.5rem; }
         .loading-spinner {
             display: inline-block;
             width: 30px;
@@ -236,6 +261,7 @@
             overflow: hidden;
             color: white;
             margin-bottom: 2rem;
+            direction: rtl;
         }
         th {
             background: linear-gradient(45deg, var(--ai-color), var(--primary));
@@ -243,7 +269,7 @@
             text-align: right;
             font-weight: 600;
         }
-        td { padding: 1rem; border-bottom: 1px solid rgba(156, 39, 176, 0.2); }
+        td { padding: 1rem; border-bottom: 1px solid rgba(156, 39, 176, 0.2); text-align: right; }
         tr:hover { background: rgba(156, 39, 176, 0.1); }
         footer {
             background: rgba(0,0,0,0.5);
@@ -257,27 +283,40 @@
         .error-box {
             background: rgba(234, 67, 53, 0.2);
             border: 1px solid rgba(234, 67, 53, 0.5);
-            border-left: 4px solid #EA4335;
+            border-right: 4px solid #EA4335;
             padding: 1.5rem;
             border-radius: 8px;
             color: #ff9999;
             margin-bottom: 1.5rem;
+            text-align: right;
         }
         .error-box strong { display: block; color: #ffcccc; margin-bottom: 0.5rem; }
         .success-box {
             background: rgba(52, 168, 83, 0.2);
             border: 1px solid rgba(52, 168, 83, 0.5);
-            border-left: 4px solid #34A853;
+            border-right: 4px solid #34A853;
             padding: 1.5rem;
             border-radius: 8px;
             color: #4ade80;
             margin-bottom: 1.5rem;
+            text-align: right;
+        }
+        .currency-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, var(--ai-color), var(--primary));
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 0.5rem;
         }
         @media (max-width: 768px) {
             .hero h1 { font-size: 2rem; }
             .hero { padding: 40px 1rem; }
             .container { padding: 1rem; }
             .services-grid { grid-template-columns: 1fr; }
+            #countrySelect { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
         }
     </style>
 </head>
@@ -285,18 +324,32 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="#" class="nav-logo"><span class="ai-badge">AI</span>🎯 Google Ads Pro</a>
-            <ul class="nav-links">
-                <li><a href="#services">الخدمات</a></li>
-                <li><a href="#analysis">التحليل</a></li>
-            </ul>
+            <div class="nav-right">
+                <select id="countrySelect" onchange="changeCountry()">
+                    <option value="eg">🇪🇬 مصر - الجنيه المصري</option>
+                    <option value="kw">🇰🇼 الكويت - الدينار الكويتي</option>
+                    <option value="ae">🇦🇪 الإمارات - الدرهم الإماراتي</option>
+                    <option value="sa">🇸🇦 السعودية - الريال السعودي</option>
+                    <option value="qa">🇶🇦 قطر - الريال القطري</option>
+                    <option value="bh">🇧🇭 البحرين - الدينار البحريني</option>
+                    <option value="om">🇴🇲 عمان - الريال العماني</option>
+                    <option value="jd">🇯🇴 الأردن - الدينار الأردني</option>
+                    <option value="lb">🇱🇧 لبنان - الليرة اللبنانية</option>
+                </select>
+                <ul class="nav-links">
+                    <li><a href="#services">الخدمات</a></li>
+                    <li><a href="#analysis">التحليل</a></li>
+                </ul>
+            </div>
         </div>
     </nav>
 
     <section class="hero">
         <div class="hero-content">
-            <div class="ai-indicator">✨ تحليل ذكي محلي (بدون CORS Issues)</div>
+            <div class="ai-indicator">✨ تحليل ذكي محلي بدعم كامل للعربية</div>
             <h1>🤖 منصة تحليل إعلانات Google متقدمة</h1>
             <p>تحليل احترافي بالذكاء الاصطناعي لكل خدمة من خدمات جوجل أدز</p>
+            <p id="countryDisplay" style="font-size: 1rem; margin-top: 1.5rem; opacity: 0.9;"></p>
         </div>
     </section>
 
@@ -348,7 +401,7 @@
                 <h2 style="margin-bottom: 2rem; color: white;">📤 رفع بيانات Google Ads</h2>
                 <input type="file" id="csvFile" class="upload-input" accept=".csv" onchange="handleFileUpload(event)">
                 <label for="csvFile" class="upload-label">📁 اختر ملف CSV</label>
-                <p style="margin-top: 1rem; color: rgba(255,255,255,0.7);" id="file-status">استخدم البيانات المصدرة من Google Ads</p>
+                <p style="margin-top: 1rem; color: rgba(255,255,255,0.7); text-align: center;" id="file-status">استخدم البيانات المصدرة من Google Ads</p>
             </div>
         </section>
 
@@ -365,13 +418,54 @@
 
     <footer>
         <p>🤖 Google Ads AI Pro - منصة تحليل متقدمة</p>
-        <p style="margin-top: 0.5rem; opacity: 0.8;">✅ تحليل محلي بدون الاعتماد على API خارجي</p>
+        <p style="margin-top: 0.5rem; opacity: 0.8;">✅ دعم كامل للعربية والدول العربية</p>
         <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.6;">📅 تحديث: 2025-12-05</p>
     </footer>
 
     <script>
+        // قاموس العملات والدول
+        const countries = {
+            'eg': { name: 'مصر', currency: 'ج.م', symbol: '£', flag: '🇪🇬' },
+            'kw': { name: 'الكويت', currency: 'دينار كويتي', symbol: 'د.ك', flag: '🇰🇼' },
+            'ae': { name: 'الإمارات', currency: 'درهم إماراتي', symbol: 'د.إ', flag: '🇦🇪' },
+            'sa': { name: 'السعودية', currency: 'ريال سعودي', symbol: 'ر.س', flag: '🇸🇦' },
+            'qa': { name: 'قطر', currency: 'ريال قطري', symbol: 'ر.ق', flag: '🇶🇦' },
+            'bh': { name: 'البحرين', currency: 'دينار بحريني', symbol: 'د.ب', flag: '🇧🇭' },
+            'om': { name: 'عمان', currency: 'ريال عماني', symbol: 'ر.ع', flag: '🇴🇲' },
+            'jd': { name: 'الأردن', currency: 'دينار أردني', symbol: 'د.ا', flag: '🇯🇴' },
+            'lb': { name: 'لبنان', currency: 'ليرة لبنانية', symbol: 'ل.ل', flag: '🇱🇧' }
+        };
+
         let currentService = null;
         let uploadedData = null;
+        let currentCountry = 'eg';
+        let currentCurrency = countries['eg'];
+
+        function changeCountry() {
+            currentCountry = document.getElementById('countrySelect').value;
+            currentCurrency = countries[currentCountry];
+            updateCountryDisplay();
+            saveToLocalStorage();
+        }
+
+        function updateCountryDisplay() {
+            const display = document.getElementById('countryDisplay');
+            display.innerHTML = `<span class="currency-badge">${currentCurrency.flag} ${currentCurrency.name}</span>`;
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('selectedCountry', currentCountry);
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('selectedCountry');
+            if (saved && countries[saved]) {
+                currentCountry = saved;
+                currentCurrency = countries[saved];
+                document.getElementById('countrySelect').value = saved;
+                updateCountryDisplay();
+            }
+        }
 
         function selectService(service) {
             currentService = service;
@@ -445,7 +539,7 @@
 
 📊 المقاييس:
 • CTR: 6.82% (فوق المتوسط)
-• CPC: 2.45 ريال
+• CPC: 2.45 ${currentCurrency.symbol}
 • Conversion Rate: 4.97%`,
 
                 'shopping': `تحليل Shopping Ads:
@@ -464,7 +558,7 @@
 
 📊 المقاييس:
 • ROAS: 3.2x
-• Cost per Sale: 49.2 ريال
+• Cost per Sale: 49.2 ${currentCurrency.symbol}
 • Impressions: 125.4K`,
 
                 'display': `تحليل Display Ads:
@@ -484,7 +578,7 @@
 📊 المقاييس:
 • Viewability: 62%
 • CTR: 0.8%
-• CPC: 1.2 ريال`,
+• CPC: 1.2 ${currentCurrency.symbol}`,
 
                 'video': `تحليل Video Ads:
 
@@ -502,7 +596,7 @@
 
 📊 المقاييس:
 • Watch Rate: 78%
-• CPV: 0.15 ريال
+• CPV: 0.15 ${currentCurrency.symbol}
 • Conversions: 425`,
 
                 'app': `تحليل App Campaigns:
@@ -520,7 +614,7 @@
 3. تحسين ASO
 
 📊 المقاييس:
-• CPI: 2.5 ريال
+• CPI: 2.5 ${currentCurrency.symbol}
 • ROAS: 4.5x
 • Retention Day 7: 42%`,
 
@@ -540,7 +634,7 @@
 
 📊 المقاييس:
 • Conversions: 425
-• CPA: 49.2 ريال
+• CPA: 49.2 ${currentCurrency.symbol}
 • ROAS: 3.2x`
             };
 
@@ -550,7 +644,7 @@
                 { label: 'الانطباعات', value: '125.4K' },
                 { label: 'النقرات', value: '8.5K' },
                 { label: 'CTR', value: '6.82%' },
-                { label: 'CPC', value: '2.45 ريال' },
+                { label: 'CPC', value: `2.45 ${currentCurrency.symbol}` },
                 { label: 'التحويلات', value: '425' },
                 { label: 'ROAS', value: '3.2x' }
             ];
@@ -565,6 +659,9 @@
             const analysisContainer = document.getElementById('analysis-content');
             analysisContainer.innerHTML = `
                 <div class="success-box"><strong>✅ نجح</strong> تم التحليل بنجاح!</div>
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <span class="currency-badge">${currentCurrency.flag} ${currentCurrency.name}</span>
+                </div>
                 <div class="stats-container" id="stats-container">${statsHtml}</div>
                 <div class="ai-insight">${analysis}</div>
             `;
@@ -572,6 +669,8 @@
 
         window.addEventListener('load', () => {
             console.log('✅ منصة Google Ads AI Pro محملة بنجاح');
+            loadFromLocalStorage();
+            updateCountryDisplay();
         });
     </script>
 </body>
