@@ -157,16 +157,13 @@
                 <option value="kw">🇰🇼 الكويت</option>
                 <option value="ae">🇦🇪 الإمارات</option>
                 <option value="sa">🇸🇦 السعودية</option>
-                <option value="qa">🇶🇦 قطر</option>
-                <option value="bh">🇧🇭 البحرين</option>
-                <option value="om">🇴🇲 عمان</option>
             </select>
         </div>
     </nav>
 
     <section class="hero">
         <h1>🤖 محلل Google Ads الذكي</h1>
-        <p>تحليل ذكي 100% من ملفات CSV الأصلية</p>
+        <p>تحليل ذكي 100% من ملفات CSV الأصلية من Google Ads</p>
     </section>
 
     <div class="container">
@@ -189,14 +186,6 @@
                     <div class="icon">🎬</div>
                     <h3>Video Ads</h3>
                 </div>
-                <div class="service-card" onclick="setService('app')">
-                    <div class="icon">📱</div>
-                    <h3>App</h3>
-                </div>
-                <div class="service-card" onclick="setService('performance')">
-                    <div class="icon">⚡</div>
-                    <h3>Performance</h3>
-                </div>
             </div>
         </section>
 
@@ -217,18 +206,14 @@
 
     <footer>
         <p>🤖 Google Ads AI Pro - محلل متقدم ذكي</p>
-        <p style="margin-top: 0.5rem; opacity: 0.8;">✅ تحليل دقيق 100%</p>
     </footer>
 
     <script>
         const countries = {
-            eg: { name: 'مصر', symbol: '£', flag: '🇪🇬' },
-            kw: { name: 'الكويت', symbol: 'د.ك', flag: '🇰🇼' },
-            ae: { name: 'الإمارات', symbol: 'د.إ', flag: '🇦🇪' },
-            sa: { name: 'السعودية', symbol: 'ر.س', flag: '🇸🇦' },
-            qa: { name: 'قطر', symbol: 'ر.ق', flag: '🇶🇦' },
-            bh: { name: 'البحرين', symbol: 'د.ب', flag: '🇧🇭' },
-            om: { name: 'عمان', symbol: 'ر.ع', flag: '🇴🇲' }
+            eg: { name: 'مصر', symbol: 'EGP' },
+            kw: { name: 'الكويت', symbol: 'KWD' },
+            ae: { name: 'الإمارات', symbol: 'AED' },
+            sa: { name: 'السعودية', symbol: 'SAR' }
         };
 
         let service = '';
@@ -248,27 +233,29 @@
                 search: 'Search Ads',
                 shopping: 'Shopping Ads',
                 display: 'Display Ads',
-                video: 'Video Ads',
-                app: 'App Campaigns',
-                performance: 'Performance Max'
+                video: 'Video Ads'
             };
             document.getElementById('status').innerText = `✅ تم اختيار: ${names[s]}`;
         }
 
-        function parseCSV(text) {
-            // نظف النص
+        function parseGoogleAdsCSV(text) {
             text = text.replace(/\r\n/g, '\n').trim();
-            let lines = text.split('\n').filter(l => l.trim());
+            let lines = text.split('\n');
             
-            if (lines.length < 2) return null;
+            if (lines.length < 4) return null;
 
-            // اكتشف الفاصل
-            let delim = ',';
-            if (lines[0].includes(';')) delim = ';';
-            if (lines[0].includes('\t')) delim = '\t';
+            // ابحث عن صف الرؤوس - يجب أن يحتوي على "النقرات" و "التكلفة"
+            let headerIdx = -1;
+            for (let i = 0; i < Math.min(lines.length, 10); i++) {
+                if (lines[i].includes('النقرات') && lines[i].includes('التكلفة')) {
+                    headerIdx = i;
+                    break;
+                }
+            }
 
-            // دالة تحليل
-            function parse(line) {
+            if (headerIdx === -1) return null;
+
+            function parseRow(line) {
                 let cells = [];
                 let cell = '';
                 let quoted = false;
@@ -281,51 +268,52 @@
                         } else {
                             quoted = !quoted;
                         }
-                    } else if (line[i] === delim && !quoted) {
-                        cells.push(cell.replace(/"/g, '').trim());
+                    } else if (line[i] === ',' && !quoted) {
+                        cells.push(cell.trim());
                         cell = '';
                     } else {
                         cell += line[i];
                     }
                 }
-                cells.push(cell.replace(/"/g, '').trim());
+                cells.push(cell.trim());
                 return cells;
             }
 
-            // استخرج الرؤوس
-            const headers = parse(lines[0]).map(h => h.toLowerCase().trim());
+            const headers = parseRow(lines[headerIdx]).map(h => h.toLowerCase().replace(/"/g, ''));
             
-            // جرب الصفوف
-            for (let i = 1; i < Math.min(lines.length, 20); i++) {
-                const cells = parse(lines[i]);
+            // ابحث عن البيانات الفعلية (اتجاهل صفوف "الإجمالي")
+            for (let i = headerIdx + 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line || line.includes('الإجمالي')) continue;
+
+                const cells = parseRow(line);
                 const obj = {};
                 
                 for (let j = 0; j < headers.length; j++) {
                     const h = headers[j];
                     const val = cells[j] || '0';
-                    const num = parseFloat(val.replace(/[^\d.-]/g, '').replace(/,/g, '')) || 0;
+                    const cleanVal = val.replace(/"/g, '').replace(/"/g, '').trim();
+                    const num = parseFloat(cleanVal.replace(/,/g, '').replace(/[^\d.-]/g, '')) || 0;
                     
-                    if (h.includes('impression')) obj.impressions = num;
-                    if (h.includes('click')) obj.clicks = num;
-                    if (h.includes('conversion')) obj.conversions = num;
-                    if ((h.includes('cost') || h.includes('spend')) && num > 0) obj.spend = num;
-                    if (h === 'ctr' || h.includes('ctr')) obj.ctr = num > 100 ? num / 100 : num;
-                    if (h === 'avg. cpc' || h === 'cpc') obj.cpc = num;
-                    if (h.includes('cost') && h.includes('conv')) obj.costPerConv = num;
+                    if (h.includes('النقرات')) obj.clicks = num;
+                    if (h.includes('الظهور')) obj.impressions = num;
+                    if (h.includes('التكلفة') && h === 'التكلفة') obj.spend = num;
+                    if (h.includes('متوسط التكلفة') && h === 'متوسط التكلفة') obj.cpc = num;
+                    if (h.includes('متوسط التكلفة لكل ألف')) obj.cpm = num;
                 }
-                
-                if ((obj.clicks || obj.conversions) && !csvData) {
-                    // احسب الناقص
-                    if (obj.impressions && obj.clicks && !obj.ctr) {
+
+                if (obj.clicks > 0 || obj.impressions > 0) {
+                    // احسب CTR و الناقص
+                    if (obj.impressions > 0 && obj.clicks > 0) {
                         obj.ctr = ((obj.clicks / obj.impressions) * 100).toFixed(2);
+                    } else {
+                        obj.ctr = 0;
                     }
-                    if (obj.clicks && obj.spend && !obj.cpc) {
+
+                    if (!obj.cpc && obj.clicks > 0 && obj.spend > 0) {
                         obj.cpc = (obj.spend / obj.clicks).toFixed(2);
                     }
-                    if (obj.conversions && obj.spend && !obj.costPerConv) {
-                        obj.costPerConv = (obj.spend / obj.conversions).toFixed(2);
-                    }
-                    
+
                     return obj;
                 }
             }
@@ -339,8 +327,8 @@
 
             const reader = new FileReader();
             reader.onload = (evt) => {
-                csvData = parseCSV(evt.target.result);
-                if (csvData && (csvData.clicks || csvData.conversions)) {
+                csvData = parseGoogleAdsCSV(evt.target.result);
+                if (csvData && (csvData.clicks > 0 || csvData.impressions > 0)) {
                     document.getElementById('status').innerText = `✅ تم تحميل: ${file.name} | النقرات: ${Math.round(csvData.clicks)} | الانطباعات: ${Math.round(csvData.impressions)}`;
                 } else {
                     document.getElementById('status').innerText = `❌ فشل - تأكد من صيغة الملف`;
@@ -365,7 +353,7 @@
 
             setTimeout(() => {
                 const d = csvData;
-                const sym = currency.symbol;
+                const sym = d.spend > 0 ? 'EGP' : '';
 
                 let score = 50;
                 const str = [];
@@ -373,9 +361,9 @@
 
                 if (d.ctr >= 5) { score += 15; str.push(`✓ CTR ممتاز: ${d.ctr}%`); }
                 else if (d.ctr < 2) { score -= 10; warn.push(`• CTR منخفض: ${d.ctr}%`); }
+                else if (d.ctr > 0) { str.push(`✓ CTR جيد: ${d.ctr}%`); }
 
-                if (d.conversions > 100) { score += 15; str.push(`✓ تحويلات قوية: ${d.conversions}`); }
-                if (d.clicks < 50 && d.clicks > 0) str.push(`✓ عدد نقرات محدود = تكاليف منخفضة`);
+                if (d.clicks > 100) str.push(`✓ عدد نقرات قوي: ${Math.round(d.clicks)}`);
 
                 const analysis = `🔍 تحليل حملتك - ${service.toUpperCase()}
 
@@ -388,9 +376,8 @@
 • النقرات: ${Math.round(d.clicks || 0)}
 • CTR: ${d.ctr || 0}%
 • CPC: ${d.cpc || 0} ${sym}
-• التحويلات: ${Math.round(d.conversions || 0)}
-• تكلفة التحويل: ${d.costPerConv || 0} ${sym}
 • الإنفاق الإجمالي: ${Math.round(d.spend || 0)} ${sym}
+• CPM: ${d.cpm || 0} ${sym}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ✅ نقاط القوة:
@@ -411,16 +398,15 @@ ${warn.length ? warn.join('\n') : '• لا توجد تحذيرات'}
 📈 الأهداف (30 يوم):
 • CTR: ${d.ctr}% → ${(d.ctr * 1.3).toFixed(2)}% (+30%)
 • CPC: ${d.cpc} → ${(d.cpc * 0.75).toFixed(2)} ${sym} (↓25%)
-• نقرات: ${Math.round(d.clicks)} → ${Math.round(d.clicks * 1.4)} (+40%)
-• تحويلات: ${Math.round(d.conversions)} → ${Math.round(d.conversions * 1.3)} (+30%)`;
+• نقرات: ${Math.round(d.clicks)} → ${Math.round(d.clicks * 1.4)} (+40%)`;
 
                 const stats = [
                     { l: 'الانطباعات', v: Math.round(d.impressions || 0).toLocaleString() },
                     { l: 'النقرات', v: Math.round(d.clicks || 0).toLocaleString() },
                     { l: 'CTR', v: `${d.ctr || 0}%` },
                     { l: 'CPC', v: `${d.cpc || 0} ${sym}` },
-                    { l: 'التحويلات', v: Math.round(d.conversions || 0).toLocaleString() },
-                    { l: 'تكلفة التحويل', v: `${d.costPerConv || 0} ${sym}` }
+                    { l: 'الإنفاق', v: `${Math.round(d.spend || 0)} ${sym}` },
+                    { l: 'CPM', v: `${d.cpm || 0} ${sym}` }
                 ];
 
                 let html = '<div class="success">✅ تم التحليل بنجاح!</div><div class="stats">';
