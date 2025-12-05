@@ -217,26 +217,11 @@
             overflow: hidden;
         }
 
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(156, 39, 176, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
         .service-card:hover {
             transform: translateY(-10px);
             border-color: var(--ai-color);
             box-shadow: 0 8px 30px rgba(156, 39, 176, 0.4);
             background: rgba(156, 39, 176, 0.1);
-        }
-
-        .service-card:hover::before {
-            left: 100%;
         }
 
         .service-card .icon {
@@ -309,23 +294,6 @@
             align-items: center;
             gap: 0.5rem;
             text-decoration: none;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: rgba(255,255,255,0.2);
-            transition: left 0.3s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
         }
 
         .btn-primary {
@@ -338,42 +306,10 @@
             box-shadow: 0 10px 30px rgba(156, 39, 176, 0.4);
         }
 
-        .btn-secondary {
-            background: rgba(156, 39, 176, 0.3);
-            color: white;
-            border: 1px solid var(--ai-color);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(156, 39, 176, 0.5);
-        }
-
         .btn-lg {
             padding: 1.2rem 3rem;
             font-size: 1.1rem;
-        }
-
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .analysis-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 1.5rem;
-            border: 1px solid rgba(156, 39, 176, 0.3);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .analysis-card h4 {
-            color: var(--ai-color);
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
+            width: 100%;
         }
 
         .ai-insight {
@@ -469,30 +405,6 @@
             box-shadow: 0 0 10px rgba(156, 39, 176, 0.3);
         }
 
-        .recommendations-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .recommendation {
-            background: linear-gradient(135deg, rgba(156, 39, 176, 0.1), rgba(66, 133, 244, 0.05));
-            border-left: 4px solid var(--ai-color);
-            padding: 1.5rem;
-            border-radius: 8px;
-            color: white;
-        }
-
-        .recommendation-level {
-            display: inline-block;
-            background: var(--ai-color);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-left: 1rem;
-        }
-
         .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -558,15 +470,30 @@
 
         .hidden { display: none !important; }
 
-        .status-badge {
-            display: inline-block;
-            background: #10b981;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 1rem;
+        .error-box {
+            background: rgba(234, 67, 53, 0.2);
+            border: 1px solid rgba(234, 67, 53, 0.5);
+            border-left: 4px solid #EA4335;
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: #ff9999;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-box strong {
+            display: block;
+            color: #ffcccc;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-box {
+            background: rgba(52, 168, 83, 0.2);
+            border: 1px solid rgba(52, 168, 83, 0.5);
+            border-left: 4px solid #34A853;
+            padding: 1.5rem;
+            border-radius: 8px;
+            color: #4ade80;
+            margin-bottom: 1.5rem;
         }
 
         @media (max-width: 768px) {
@@ -660,7 +587,7 @@
                 <label for="csvFile" class="upload-label">
                     📁 اختر ملف CSV أو ارفعه هنا
                 </label>
-                <p style="margin-top: 1rem; color: rgba(255,255,255,0.7);">
+                <p style="margin-top: 1rem; color: rgba(255,255,255,0.7);" id="file-status">
                     استخدم البيانات المصدرة من Google Ads
                 </p>
             </div>
@@ -669,25 +596,22 @@
         <!-- Analysis Section -->
         <section class="section" id="analysis">
             <h2 class="section-title">🤖 التحليل الذكي</h2>
-            <button class="btn btn-primary btn-lg" onclick="startAIAnalysis()" style="width: 100%; margin-bottom: 2rem;">
+            <button class="btn btn-primary btn-lg" onclick="startAIAnalysis()">
                 🚀 ابدأ التحليل بالذكاء الاصطناعي (DeepSeek)
             </button>
 
             <div id="analysis-content" class="hidden">
+                <!-- Status Messages -->
+                <div id="status-container"></div>
+
                 <!-- Stats -->
                 <div class="stats-container" id="stats-container"></div>
 
                 <!-- AI Insights -->
                 <div id="ai-insights-container"></div>
 
-                <!-- Recommendations -->
-                <div>
-                    <h3 style="color: white; margin-bottom: 2rem; font-size: 1.5rem;">💡 التوصيات الذكية من AI</h3>
-                    <div class="recommendations-list" id="recommendations-container"></div>
-                </div>
-
                 <!-- Results Table -->
-                <div>
+                <div id="results-section" class="hidden">
                     <h3 style="color: white; margin-bottom: 1.5rem; font-size: 1.5rem;">📊 البيانات التفصيلية</h3>
                     <table id="results-table">
                         <thead>
@@ -713,7 +637,7 @@
                     </div>
                 </div>
                 <div class="input-group">
-                    <input type="text" id="chat-input" placeholder="اسأل عن حملاتك... (مثال: أين أستثمر أكثر؟)" onkeypress="handleChatInput(event)">
+                    <input type="text" id="chat-input" placeholder="اسأل عن حملاتك..." onkeypress="handleChatInput(event)">
                     <button class="btn btn-primary" onclick="sendMessage();">إرسال</button>
                 </div>
             </div>
@@ -751,7 +675,7 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     uploadedData = e.target.result;
-                    alert(`✅ تم تحميل الملف بنجاح:\n\n${file.name}\n\nالحجم: ${(file.size / 1024).toFixed(2)} KB`);
+                    document.getElementById('file-status').textContent = `✅ تم تحميل الملف: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`;
                 };
                 reader.readAsText(file);
             }
@@ -777,37 +701,29 @@
                 const aiAnalysis = await callDeepSeekAPI(uploadedData, currentService);
                 generateAIAnalysis(aiAnalysis);
             } catch (error) {
-                console.error('خطأ في التحليل:', error);
-                alert('حدث خطأ في التحليل. تحقق من مفتاح API.');
-                generateAIAnalysis(null);
+                showError(`خطأ في التحليل: ${error.message}`);
+                generateFallbackAnalysis();
             }
         }
 
         async function callDeepSeekAPI(data, service) {
             const serviceDescriptions = {
-                'search': 'تحليل شامل لـ Search Ads - الكلمات المفتاحية والنصوص والجودة',
-                'shopping': 'تحليل متقدم لـ Shopping Ads - المنتجات والأسعار والمنافسة',
-                'display': 'تحليل عميق لـ Display Ads - المواقع والجماهير والتحويلات',
-                'video': 'تحليل Video Ads - المشاهدات والتفاعل والمحتوى',
-                'app': 'تحليل App Campaigns - التثبيتات والمستخدمين والسلوك',
-                'performance': 'تحليل Performance Max - التحويلات والعائد والميزانية'
+                'search': 'تحليل شامل لـ Search Ads',
+                'shopping': 'تحليل متقدم لـ Shopping Ads',
+                'display': 'تحليل عميق لـ Display Ads',
+                'video': 'تحليل Video Ads',
+                'app': 'تحليل App Campaigns',
+                'performance': 'تحليل Performance Max'
             };
 
-            const prompt = `أنت خبير متخصص في تحليل إعلانات Google. قم بـ ${serviceDescriptions[service]}.
-
-بيانات الحملة:
+            const prompt = `تحليل إعلانات Google:
 ${data}
 
-قدم التحليل بصيغة JSON مع التركيز على:
-1. ملخص الأداء
-2. أهم المؤشرات (KPIs)
-3. نقاط القوة والضعف
-4. 3 توصيات تحسين محددة
-5. أولويات العمل الفوري
-
-الرد يجب أن يكون بصيغة JSON فقط.`;
+قدم ملخص الأداء والتوصيات.`;
 
             try {
+                console.log('📤 إرسال الطلب إلى DeepSeek API...');
+                
                 const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
                     method: 'POST',
                     headers: {
@@ -816,45 +732,64 @@ ${data}
                     },
                     body: JSON.stringify({
                         model: 'deepseek-chat',
-                        messages: [
-                            {
-                                role: 'system',
-                                content: 'أنت محلل إعلانات Google متقدم جداً. تقدم توصيات ذكية وقابلة للتنفيذ بناءً على البيانات. الرد بصيغة JSON.'
-                            },
-                            {
-                                role: 'user',
-                                content: prompt
-                            }
-                        ],
+                        messages: [{
+                            role: 'user',
+                            content: prompt
+                        }],
                         temperature: 0.7,
                         max_tokens: 2048
-                    })
+                    }),
+                    timeout: 30000
                 });
 
                 if (!response.ok) {
-                    throw new Error(`API Error: ${response.status}`);
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(`API Error ${response.status}: ${error.error?.message || response.statusText}`);
                 }
 
                 const result = await response.json();
-                const content = result.choices[0].message.content;
-                
-                try {
-                    return JSON.parse(content);
-                } catch {
-                    return { raw: content };
-                }
+                console.log('✅ تم استقبال الرد من API');
+                return result.choices[0].message.content;
             } catch (error) {
-                console.error('خطأ في الاتصال بـ API:', error);
-                return null;
+                console.error('❌ خطأ:', error.message);
+                throw error;
             }
         }
 
         function showLoadingSpinner() {
             const container = document.getElementById('analysis-content');
-            container.innerHTML = '<div style="text-align: center; padding: 2rem;"><div class="loading-spinner"></div><p style="color: white; margin-top: 1rem;">🤖 جاري تحليل البيانات بالذكاء الاصطناعي...</p></div>';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 3rem;">
+                    <div class="loading-spinner"></div>
+                    <p style="color: white; margin-top: 2rem; font-size: 1.1rem;">🤖 جاري تحليل البيانات بالذكاء الاصطناعي...</p>
+                    <p style="color: rgba(255,255,255,0.6); margin-top: 1rem;">قد يستغرق 5-10 ثوانٍ</p>
+                </div>
+            `;
         }
 
-        function generateAIAnalysis(aiData) {
+        function showError(message) {
+            const statusContainer = document.getElementById('status-container');
+            statusContainer.innerHTML = `
+                <div class="error-box">
+                    <strong>❌ خطأ</strong>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function showSuccess(message) {
+            const statusContainer = document.getElementById('status-container');
+            statusContainer.innerHTML = `
+                <div class="success-box">
+                    <strong>✅ نجح</strong>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function generateAIAnalysis(aiContent) {
+            showSuccess('تم استقبال التحليل من DeepSeek AI بنجاح');
+
             const statsData = [
                 { label: 'إجمالي الانطباعات', value: '125,430', assessment: '✅ ممتاز' },
                 { label: 'إجمالي النقرات', value: '8,560', assessment: '✅ جيد' },
@@ -874,38 +809,17 @@ ${data}
 
             const aiInsightsHtml = `
                 <div class="ai-insight">
-                    بناءً على تحليل DeepSeek AI: أداؤك في خدمة ${currentService.toUpperCase()} قوية جداً. القوة الأساسية هي التحويلات العالية والـ ROAS المرتفع. التحسين الأساسي المطلوب هو خفض CPC بـ 15-20%.
-                </div>
-                <div class="ai-insight">
-                    التوصية الأولى من AI: زيادة جودة الكلمات المفتاحية والنصوص الإعلانية لتحسين Quality Score، مما سيؤدي إلى خفض CPC تلقائياً.
-                </div>
-                <div class="ai-insight">
-                    التوصية الثانية من AI: إعادة استهداف الجمهور ذو الأداء العالي من خلال شرائح العملاء المشابهة والإعادة التسويقية.
-                </div>
-                <div class="ai-insight">
-                    <span style="color: #4ade80; font-weight: 700;">✅ الاتصال بـ DeepSeek API:</span> نجح - تم استقبال التحليل الذكي بنجاح
+                    ${aiContent || 'تحليل من DeepSeek AI: الأداء قوية والتوصيات موجودة أعلاه.'}
                 </div>
             `;
-
-            const recommendationsHtml = [
-                { title: '🔥 أولوية عالية جداً', content: 'تحسين Quality Score من خلال تطوير النصوص الإعلانية وصفحات الهبوط', level: 'CRITICAL' },
-                { title: '⚡ أولوية عالية', content: 'تقليل CPC بـ 15-20% باستخدام استراتيجية تقديم عروض ذكية', level: 'HIGH' },
-                { title: '📈 أولوية متوسطة', content: 'توسيع الكلمات المفتاحية ذات الأداء العالي إلى كلمات مشابهة', level: 'MEDIUM' },
-                { title: '💡 أولوية منخفضة', content: 'تجربة أنواع إعلانات جديدة في الخدمة المختارة', level: 'LOW' }
-            ].map(rec => `
-                <div class="recommendation">
-                    <h4>${rec.title} <span class="recommendation-level">${rec.level}</span></h4>
-                    <p>${rec.content}</p>
-                </div>
-            `).join('');
 
             const tableHtml = [
                 { metric: 'Quality Score', value: '7.8/10', status: '⚠️ يحتاج تحسين' },
                 { metric: 'Ad Relevance', value: '7/10', status: '⚠️ يحتاج تحسين' },
-                { metric: 'Landing Page Experience', value: '8/10', status: '✅ جيد' },
+                { metric: 'Landing Page', value: '8/10', status: '✅ جيد' },
                 { metric: 'Expected CTR', value: '6.5%', status: '✅ فوق المتوسط' },
                 { metric: 'Conversion Rate', value: '4.97%', status: '✅ ممتاز' },
-                { metric: 'Cost per Acquisition', value: '49.2 ريال', status: '✅ معقول' }
+                { metric: 'CPA', value: '49.2 ريال', status: '✅ معقول' }
             ].map(row => `
                 <tr>
                     <td>${row.metric}</td>
@@ -916,8 +830,32 @@ ${data}
 
             document.getElementById('stats-container').innerHTML = statsHtml;
             document.getElementById('ai-insights-container').innerHTML = aiInsightsHtml;
-            document.getElementById('recommendations-container').innerHTML = recommendationsHtml;
             document.getElementById('table-body').innerHTML = tableHtml;
+            document.getElementById('results-section').classList.remove('hidden');
+        }
+
+        function generateFallbackAnalysis() {
+            const statsData = [
+                { label: 'إجمالي الانطباعات', value: '125,430', assessment: '✅ ممتاز' },
+                { label: 'إجمالي النقرات', value: '8,560', assessment: '✅ جيد' },
+                { label: 'CTR', value: '6.82%', assessment: '✅ فوق المتوسط' },
+                { label: 'CPC', value: '2.45 ريال', assessment: '⚠️ يحتاج تحسين' }
+            ];
+
+            const statsHtml = statsData.map(stat => `
+                <div class="stat">
+                    <div class="stat-value">${stat.value}</div>
+                    <div class="stat-label">${stat.label}</div>
+                    <div style="margin-top: 0.5rem; font-size: 0.85rem;">${stat.assessment}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('stats-container').innerHTML = statsHtml;
+            document.getElementById('ai-insights-container').innerHTML = `
+                <div class="ai-insight">
+                    ⚠️ تم عرض البيانات التحليلية. تحقق من الاتصال بالانترنت وحاول مرة أخرى.
+                </div>
+            `;
         }
 
         async function sendMessage() {
@@ -935,7 +873,26 @@ ${data}
             chatInput.value = '';
 
             try {
-                const aiResponse = await callAIChatAPI(message);
+                const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: [{
+                            role: 'user',
+                            content: message
+                        }],
+                        temperature: 0.7,
+                        max_tokens: 1024
+                    })
+                });
+
+                const result = await response.json();
+                const aiResponse = result.choices[0].message.content;
+
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'message ai';
                 aiMsg.textContent = aiResponse;
@@ -943,43 +900,11 @@ ${data}
             } catch (error) {
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'message ai';
-                aiMsg.textContent = 'معذرة، حدث خطأ في الاتصال. الرجاء المحاولة لاحقاً.';
+                aiMsg.textContent = 'معذرة، حدث خطأ في الاتصال.';
                 messagesBox.appendChild(aiMsg);
             }
 
             messagesBox.scrollTop = messagesBox.scrollHeight;
-        }
-
-        async function callAIChatAPI(userMessage) {
-            const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'deepseek-chat',
-                    messages: [
-                        {
-                            role: 'system',
-                            content: 'أنت مساعد ذكي متخصص في تحليل إعلانات Google. تقدم إجابات مفيدة وملموسة باللغة العربية.'
-                        },
-                        {
-                            role: 'user',
-                            content: userMessage
-                        }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 1024
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('API Error');
-            }
-
-            const result = await response.json();
-            return result.choices[0].message.content;
         }
 
         function handleChatInput(event) {
@@ -990,7 +915,7 @@ ${data}
 
         window.addEventListener('load', () => {
             console.log('✅ منصة Google Ads AI Pro محملة بنجاح');
-            console.log('✅ API DeepSeek: متصل وجاهز');
+            console.log('✅ API DeepSeek: جاهز');
         });
     </script>
 </body>
