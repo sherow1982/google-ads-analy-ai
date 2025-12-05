@@ -100,6 +100,7 @@
         }
         .service-card .icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
         .service-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--ai-color); }
+        .service-card p { font-size: 0.9rem; opacity: 0.8; }
         .upload-section {
             background: rgba(255,255,255,0.05);
             border-radius: 12px;
@@ -132,7 +133,9 @@
             background: linear-gradient(45deg, var(--ai-color), var(--primary));
             color: white;
             width: 100%;
+            transition: all 0.3s;
         }
+        .btn:hover { transform: scale(1.02); }
         .analysis-box {
             background: rgba(156, 39, 176, 0.1);
             border-right: 4px solid var(--ai-color);
@@ -149,17 +152,9 @@
             max-height: 700px;
             overflow-y: auto;
         }
-        .analysis-box::-webkit-scrollbar {
-            width: 8px;
-        }
-        .analysis-box::-webkit-scrollbar-track {
-            background: rgba(156, 39, 176, 0.1);
-            border-radius: 4px;
-        }
-        .analysis-box::-webkit-scrollbar-thumb {
-            background: var(--ai-color);
-            border-radius: 4px;
-        }
+        .analysis-box::-webkit-scrollbar { width: 8px; }
+        .analysis-box::-webkit-scrollbar-track { background: rgba(156, 39, 176, 0.1); border-radius: 4px; }
+        .analysis-box::-webkit-scrollbar-thumb { background: var(--ai-color); border-radius: 4px; }
         .loading-spinner {
             display: inline-block;
             width: 30px;
@@ -206,6 +201,7 @@
         @media (max-width: 768px) {
             .hero h1 { font-size: 1.8rem; }
             .analysis-box { max-height: 400px; font-size: 0.85rem; }
+            .nav-links { display: none; }
         }
     </style>
 </head>
@@ -308,16 +304,22 @@
                 'search': 'Search Ads', 'shopping': 'Shopping Ads', 'display': 'Display Ads',
                 'video': 'Video Ads', 'app': 'App Campaigns', 'performance': 'Performance Max'
             };
-            alert(`✅ تم اختيار: ${names[service]}`);
+            document.querySelectorAll('.service-card').forEach(card => card.style.borderColor = 'rgba(156, 39, 176, 0.3)');
+            event.target.closest('.service-card').style.borderColor = '#9C27B0';
         }
 
         function parseCSVData(csvText) {
-            let lines = csvText.trim().split('\n').filter(l => l.trim());
+            if (!csvText || csvText.trim().length === 0) return null;
+
+            let lines = csvText.trim().split('\n');
+            lines = lines.filter(l => l.trim().length > 0);
+            
             if (lines.length < 2) return null;
 
             let delimiter = ',';
-            if (lines[0].includes(';') && !lines[0].includes(',')) delimiter = ';';
-            else if (lines[0].includes('\t')) delimiter = '\t';
+            const firstLine = lines[0];
+            if (firstLine.includes(';') && !firstLine.includes(',')) delimiter = ';';
+            else if (firstLine.includes('\t')) delimiter = '\t';
 
             function parseCSVLine(line) {
                 const result = [];
@@ -353,14 +355,18 @@
                     .trim()
             );
 
+            if (headers.length === 0) return null;
+
             let dataRowIndex = 1;
             let maxDataFound = 0;
 
-            for (let i = 1; i < Math.min(lines.length, 5); i++) {
+            for (let i = 1; i < Math.min(lines.length, 10); i++) {
                 const row = parseCSVLine(lines[i]);
                 let dataCount = 0;
                 for (const cell of row) {
-                    if (cell && !isNaN(parseFloat(cell.replace(/[^\d.-]/g, '')))) dataCount++;
+                    if (cell && /\d/.test(cell.replace(/[^\d.-]/g, ''))) {
+                        dataCount++;
+                    }
                 }
                 if (dataCount > maxDataFound) {
                     maxDataFound = dataCount;
@@ -368,16 +374,18 @@
                 }
             }
 
+            if (maxDataFound === 0) return null;
+
             const row = parseCSVLine(lines[dataRowIndex]);
 
             const colMap = {
-                impressions: ['impressions', 'impr', 'imp', 'انطباعات'],
-                clicks: ['clicks', 'clk', 'click', 'نقرات'],
-                conversions: ['conversions', 'conv', 'conversion', 'تحويلات'],
-                spend: ['cost', 'spend', 'محرك', 'total cost'],
-                cpc: ['avg cpc', 'cpc', 'average cpc'],
-                ctr: ['ctr', 'click through'],
-                costConv: ['cost conv', 'cost per conv', 'cpa'],
+                impressions: ['impressions', 'impr', 'imp', 'انطباعات', 'الانطباعات'],
+                clicks: ['clicks', 'clk', 'click', 'نقرات', 'النقرات'],
+                conversions: ['conversions', 'conv', 'conversion', 'تحويلات', 'التحويلات'],
+                spend: ['cost', 'spend', 'محرك', 'total cost', 'total', 'الإنفاق', 'تكلفة'],
+                cpc: ['avg cpc', 'cpc', 'average cpc', 'متوسط cpc'],
+                ctr: ['ctr', 'click through', 'click rate'],
+                costConv: ['cost conv', 'cost per conv', 'cpa', 'cost per conversion', 'متوسط التكلفة'],
                 roas: ['roas']
             };
 
@@ -387,8 +395,8 @@
                 for (let i = 0; i < headers.length; i++) {
                     const h = headers[i];
                     if (aliases.some(alias => 
-                        h.includes(alias) || 
-                        alias.includes(h)
+                        h.includes(alias.toLowerCase()) || 
+                        alias.toLowerCase().includes(h)
                     )) {
                         data[key] = i;
                         break;
@@ -399,8 +407,9 @@
             const result = {};
             const extractNum = (cell, isFloat = false) => {
                 if (!cell) return 0;
-                const val = cell.toString().replace(/[^\d.-]/g, '');
-                return isFloat ? parseFloat(val) || 0 : parseInt(val) || 0;
+                const val = cell.toString().replace(/[^\d.-]/g, '').replace(/,/g, '');
+                if (isFloat) return parseFloat(val) || 0;
+                return parseInt(val) || 0;
             };
 
             if (data.impressions !== undefined && row[data.impressions]) {
@@ -416,7 +425,8 @@
                 result.spend = extractNum(row[data.spend], true);
             }
             if (data.ctr !== undefined && row[data.ctr]) {
-                result.ctr = extractNum(row[data.ctr], true);
+                let ctrVal = extractNum(row[data.ctr], true);
+                result.ctr = ctrVal > 100 ? ctrVal / 100 : ctrVal;
             }
             if (data.cpc !== undefined && row[data.cpc]) {
                 result.cpc = extractNum(row[data.cpc], true);
@@ -425,20 +435,33 @@
                 result.costConv = extractNum(row[data.costConv], true);
             }
 
-            if (result.impressions && result.clicks) {
+            if (!result.impressions) result.impressions = 0;
+            if (!result.clicks) result.clicks = 0;
+            if (!result.conversions) result.conversions = 0;
+            if (!result.spend) result.spend = 0;
+
+            if (result.impressions > 0 && result.clicks > 0) {
                 if (!result.ctr || result.ctr === 0) {
                     result.ctr = ((result.clicks / result.impressions) * 100).toFixed(2);
                 }
+            } else {
+                result.ctr = result.ctr || 0;
             }
-            if (result.clicks && result.spend) {
+
+            if (result.clicks > 0 && result.spend > 0) {
                 if (!result.cpc || result.cpc === 0) {
                     result.cpc = (result.spend / result.clicks).toFixed(2);
                 }
+            } else {
+                result.cpc = result.cpc || 0;
             }
-            if (result.conversions && result.spend) {
+
+            if (result.conversions > 0 && result.spend > 0) {
                 if (!result.costConv || result.costConv === 0) {
                     result.costConv = (result.spend / result.conversions).toFixed(2);
                 }
+            } else {
+                result.costConv = result.costConv || 0;
             }
 
             return result;
@@ -446,25 +469,49 @@
 
         function handleFileUpload(event) {
             const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
+            if (!file) return;
+
+            if (!file.name.endsWith('.csv')) {
+                document.getElementById('file-status').innerHTML = `⚠️ خطأ: يجب أن يكون الملف بصيغة CSV فقط`;
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onerror = () => {
+                document.getElementById('file-status').innerHTML = `⚠️ خطأ: فشل في قراءة الملف`;
+            };
+
+            reader.onload = (e) => {
+                try {
                     uploadedData = e.target.result;
                     parsedData = parseCSVData(uploadedData);
-                    if (parsedData && (parsedData.clicks || parsedData.conversions)) {
-                        document.getElementById('file-status').innerHTML = `✅ تم تحميل: <strong>${file.name}</strong><br>📊 النقرات: ${parsedData.clicks || 0} | الانطباعات: ${parsedData.impressions || 0}`;
+                    
+                    if (parsedData && (parsedData.clicks > 0 || parsedData.conversions > 0)) {
+                        document.getElementById('file-status').innerHTML = `✅ تم تحميل: <strong>${file.name}</strong><br>📊 النقرات: ${parsedData.clicks} | الانطباعات: ${parsedData.impressions} | التحويلات: ${parsedData.conversions}`;
                     } else {
-                        document.getElementById('file-status').innerHTML = `⚠️ خطأ: تأكد من صيغة الملف`;
+                        document.getElementById('file-status').innerHTML = `⚠️ خطأ: لم يتم العثور على بيانات صحيحة في الملف<br>تأكد من وجود أعمدة: النقرات أو التحويلات`;
                     }
-                };
-                reader.readAsText(file);
-            }
+                } catch (error) {
+                    document.getElementById('file-status').innerHTML = `⚠️ خطأ: ${error.message}`;
+                }
+            };
+
+            reader.readAsText(file, 'UTF-8');
         }
 
         function startAIAnalysis() {
-            if (!uploadedData) { alert('الرجاء تحميل ملف CSV أولاً'); return; }
-            if (!currentService) { alert('الرجاء اختيار خدمة أولاً'); return; }
-            if (!parsedData || (!parsedData.clicks && !parsedData.conversions)) { alert('البيانات غير صحيحة'); return; }
+            if (!uploadedData) { 
+                alert('الرجاء تحميل ملف CSV أولاً');
+                return;
+            }
+            if (!currentService) { 
+                alert('الرجاء اختيار خدمة أولاً');
+                return;
+            }
+            if (!parsedData || (parsedData.clicks === 0 && parsedData.conversions === 0)) { 
+                alert('البيانات غير صحيحة أو لا تحتوي على نقرات أو تحويلات');
+                return;
+            }
 
             const analysisContent = document.getElementById('analysis-content');
             analysisContent.classList.remove('hidden');
@@ -483,10 +530,12 @@
             const strengths = [];
 
             if (d.ctr >= 5) { score += 15; strengths.push(`CTR ممتاز: ${d.ctr}%`); }
-            else if (d.ctr < 2) { score -= 10; warnings.push(`CTR منخفض جداً: ${d.ctr}%`); }
+            else if (d.ctr < 1) { score -= 10; warnings.push(`CTR منخفض جداً: ${d.ctr}%`); }
+            else if (d.ctr < 2) { score -= 5; warnings.push(`CTR منخفض: ${d.ctr}%`); }
 
             if (d.conversions > 100) { score += 15; strengths.push(`تحويلات قوية: ${d.conversions}`); }
-            if (d.clicks < 50) { score += 5; strengths.push(`عدد نقرات محدود = تكاليف منخفضة`); }
+            if (d.clicks < 50 && d.clicks > 0) { score += 5; strengths.push(`عدد نقرات محدود = تكاليف منخفضة`); }
+            if (d.cpc > 0 && d.cpc < 1) { score += 10; strengths.push(`CPC منخفض جداً: ${d.cpc} ${sym}`); }
 
             const analysis = `🔍 تحليل حملتك - ${currentService.toUpperCase()}
 
@@ -548,7 +597,7 @@ ${warnings.length > 0 ? warnings.map(w => '• ' + w).join('\n') : '• الأد
 
 📅 الأسبوع 1:
   ✓ أضف كلمات سالبة جديدة
-  ✓ حدّث الإعلانات (20% منها على الأقل)
+  ✓ حدّث الإعلانات (20% على الأقل)
   ✓ حسّن Landing Page الرئيسية
 
 📅 الأسبوع 2:
@@ -589,22 +638,17 @@ ${warnings.length > 0 ? warnings.map(w => '• ' + w).join('\n') : '• الأد
             `;
         }
 
-        // منع تحذيرات BFCache
         window.addEventListener('beforeunload', () => {
             uploadedData = null;
             parsedData = null;
         });
 
         window.addEventListener('pagehide', (event) => {
-            if (event.persisted) {
-                console.log('✅ الصفحة دخلت BFCache');
-            }
+            if (event.persisted) console.log('✅ BFCache');
         });
 
         window.addEventListener('pageshow', (event) => {
-            if (event.persisted) {
-                console.log('✅ الصفحة استرجعت من BFCache');
-            }
+            if (event.persisted) console.log('✅ Restored');
         });
 
         window.addEventListener('load', () => {
